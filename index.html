@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWaH3wC79rB2qGtOqYYWogb4nlPbPCoqs",
+            authDomain: "patient-system-97412.firebaseapp.com",
+            projectId: "patient-system-97412",
+            storageBucket: "patient-system-97412.firebasestorage.app",
+            messagingSenderId: "988662086004",
+            appId: "1:988662086004:web:3427af061c370a87521421",
+            measurementId: "G-VXTREJV1FG"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        // Handle login form
+        const loginForm = document.getElementById("loginForm");
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            try {
+                // Sign in with Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Optional: fetch user info from Firestore
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    console.log("User data:", userDoc.data());
+                }
+
+                alert("Login successful!");
+                window.location.href = "dashboard.html"; // Redirect to dashboard page
+            } catch (error) {
+                console.error(error);
+                alert("Login error: " + error.message);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label>Email</label>
+            <input type="email" id="email" required>
+
+            <label>Password</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Login</button>
+
+            <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase functions
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-analytics.js";
+        import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBWaH3wC79rB2qGtOqYYWogb4nlPbPCoqs",
+            authDomain: "patient-system-97412.firebaseapp.com",
+            projectId: "patient-system-97412",
+            storageBucket: "patient-system-97412.firebasestorage.app",
+            messagingSenderId: "988662086004",
+            appId: "1:988662086004:web:3427af061c370a87521421",
+            measurementId: "G-VXTREJV1FG"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth();
+        const db = getFirestore();
+
+        // Handle signup form
+        const signupForm = document.getElementById("signupForm");
+        signupForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const name = document.getElementById("name").value.trim();
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            try {
+                // 1) Create user in Firebase Authentication
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // 2) Save user info in Firestore
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    email: email,
+                    createdAt: serverTimestamp()
+                });
+
+                alert("Account created successfully!");
+                window.location.href = "index.html"; // Redirect to login page
+            } catch (error) {
+                console.error(error);
+                alert("Sign up error: " + error.message);
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h2>Create Account</h2>
+        <form id="signupForm">
+            <label>Full Name</label>
+            <input type="text" id="name" required>
+
+            <label>Email</label>
+            <input type="email" id="email" required>
+
+            <label>Password</label>
+            <input type="password" id="password" required>
+
+            <button type="submit">Sign Up</button>
+
+            <p>Already have an account? <a href="index.html">Login</a></p>
+        </form>
+    </div>
+</body>
+</html>
