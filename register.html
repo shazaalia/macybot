@@ -3,12 +3,74 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register Patient</title>
+<title>Patient List</title>
 
 <style>
 body {
     font-family: Arial, sans-serif;
     background: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header + Hamburger Menu */
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+.menu-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+    cursor: pointer;
+}
+
+/* Side menu */
+.side-menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    background-color: #4CAF50;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+}
+.side-menu a {
+    padding: 15px 30px;
+    text-decoration: none;
+    font-size: 18px;
+    color: white;
+    display: block;
+}
+.side-menu a:hover {
+    background-color: #45a049;
+}
+.side-menu .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+}
+.patient-submenu {
+    display: none;
+    background-color: #388E3C;
+}
+.patient-submenu a {
+    padding-left: 50px;
+    font-size: 16px;
+}
+
+/* Page Content */
+.container {
     padding: 20px;
 }
 
@@ -18,8 +80,8 @@ h2, h3 {
 
 .form-row {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 20px;
+    grid-template-columns: 1fr auto auto; /* Full Name | Age | Contact */
+    gap: 30px;  /* space between Age and Contact Number */
     margin-bottom: 20px;
 }
 
@@ -71,24 +133,39 @@ th, td {
     text-align: left;
 }
 
-th {
-    background-color: #f0f0f0;
+/* Column width adjustments */
+#registeredTable th:nth-child(1),
+#registeredTable td:nth-child(1) {
+    width: 60%; /* Full Name */
 }
 
-/* Smaller action column */
-th:last-child, td:last-child {
-    width: 80px; /* just enough for delete button */
+#registeredTable th:nth-child(2),
+#registeredTable td:nth-child(2) {
+    width: 10%; /* Age */
+}
+
+#registeredTable th:nth-child(3),
+#registeredTable td:nth-child(3) {
+    width: 20%; /* Contact Number - wide enough for 15 digits */
+    white-space: nowrap; /* keep all digits in one line */
+}
+
+#registeredTable th:last-child,
+#registeredTable td:last-child {
+    width: 10%; /* Action column */
     text-align: center;
+}
+
+
+th {
+    background-color: #f0f0f0;
 }
 
 .delete-btn {
     background-color: #e53935;
     color: white;
-    border: none;
-    padding: 6px 10px; /* smaller padding */
+    padding: 6px 10px;
     border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px; /* slightly smaller */
 }
 
 .delete-btn:hover {
@@ -98,51 +175,113 @@ th:last-child, td:last-child {
 @media (max-width: 600px) {
     .form-row {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    input {
+        width: 100% !important;
+    }
+    #registeredTable th, #registeredTable td {
+        font-size: 12px;
     }
 }
 </style>
 </head>
 <body>
 
+<header>
+    <span class="menu-icon" id="menuBtn">&#9776;</span>
+    <h1>Patient List</h1>
+</header>
+
+<!-- Side menu -->
+<div id="myMenu" class="side-menu">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <a href="home.html">Dashboard</a>
+    <a href="#" id="patientsBtn">Patients &#9662;</a>
+    <div class="patient-submenu" id="patientSubmenu">
+        <a href="register.html">Patient List</a>
+        <a href="medschedule.html">Medicine Schedule</a>
+        <a href="log.html">Medicine Log</a>
+    </div>
+    <a href="userset.html">Settings</a>
+    <a href="#" id="logoutBtn">Logout</a>
+</div>
+
+<div class="container">
+
 <h2>Register New Patient</h2>
 
+<!-- ONE ROW with 3 fields nicely spaced -->
 <div class="form-row">
     <div class="form-group">
         <label>Full Name</label>
         <input type="text" id="regPatientName" placeholder="Enter full name" required>
     </div>
+
     <div class="form-group">
         <label>Age</label>
-        <input type="number" id="regPatientAge" placeholder="Enter age" required>
+        <input type="number" id="regPatientAge" placeholder="Age"
+            maxlength="3"
+            style="width:80px; padding:10px; border-radius:6px;" required>
+    </div>
+
+    <div class="form-group">
+        <label>Contact Number</label>
+        <input type="text" id="regContactNumber" placeholder="Enter contact number"
+            maxlength="15"
+            style="width:180px; padding:10px; border-radius:6px;" required>
     </div>
 </div>
 
 <button class="add-btn" onclick="registerPatient()">Register Patient</button>
 
-<!-- Registered Patients Table -->
 <h3>Registered Patients</h3>
 <table id="registeredTable">
     <thead>
         <tr>
             <th>Full Name</th>
             <th>Age</th>
+            <th>Contact Number</th>
             <th>Action</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 
+</div>
+
 <script>
+// ---------- Hamburger Menu Logic ----------
+const menuBtn = document.getElementById("menuBtn");
+const closeBtn = document.getElementById("closeBtn");
+const sideMenu = document.getElementById("myMenu");
+const patientsBtn = document.getElementById("patientsBtn");
+const patientSubmenu = document.getElementById("patientSubmenu");
+
+menuBtn.addEventListener("click", () => { sideMenu.style.width = "250px"; });
+closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
+
+patientsBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    patientSubmenu.style.display =
+        patientSubmenu.style.display === "block" ? "none" : "block";
+});
+
+// ------------------------------------------
+
+// Load existing patients
 function loadRegisteredPatients() {
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
     const tableBody = document.getElementById('registeredTable').querySelector('tbody');
-    tableBody.innerHTML = ''; // clear table
+    tableBody.innerHTML = '';
 
     patients.forEach((p, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${p.name}</td>
             <td>${p.age}</td>
+            <td>${p.contact}</td>
             <td><button class="delete-btn" onclick="deletePatient(${index})">Delete</button></td>
         `;
         tableBody.appendChild(row);
@@ -152,34 +291,30 @@ function loadRegisteredPatients() {
 function registerPatient() {
     const name = document.getElementById('regPatientName').value.trim();
     const age = document.getElementById('regPatientAge').value.trim();
+    const contact = document.getElementById('regContactNumber').value.trim();
 
-    if(!name || !age) {
+    if (!name || !age || !contact) {
         alert("Please fill in all fields!");
         return;
     }
 
-    // Load existing patients
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
 
-    // Prevent duplicate names
-    if(patients.some(p => p.name === name)){
+    if (patients.some(p => p.name === name)) {
         alert("Patient already registered!");
         return;
     }
 
-    // Add new patient
-    patients.push({ name, age });
+    patients.push({ name, age, contact });
     localStorage.setItem('patients', JSON.stringify(patients));
 
-    // Clear form
     document.getElementById('regPatientName').value = '';
     document.getElementById('regPatientAge').value = '';
+    document.getElementById('regContactNumber').value = '';
 
-    // Reload table
     loadRegisteredPatients();
 }
 
-// Delete patient
 function deletePatient(index) {
     let patients = JSON.parse(localStorage.getItem('patients') || '[]');
     patients.splice(index, 1);
@@ -187,7 +322,6 @@ function deletePatient(index) {
     loadRegisteredPatients();
 }
 
-// Load table on page load
 window.onload = loadRegisteredPatients;
 </script>
 

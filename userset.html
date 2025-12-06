@@ -3,31 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>User Settings</title>
+<title>Settings</title>
 
 <style>
 body {
     font-family: Arial, sans-serif;
     background: #f4f6f8;
-    padding: 20px;
+    margin: 0;
+    padding: 0;
 }
-
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+}
+.menu-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+    cursor: pointer;
+    z-index: 2;
+}
+.container {
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+}
 h2 {
     text-align: center;
     margin-bottom: 20px;
 }
-
 .form-group {
     display: flex;
     flex-direction: column;
     margin-bottom: 15px;
 }
-
 label {
     font-weight: bold;
     margin-bottom: 5px;
 }
-
 input {
     padding: 10px;
     border: 1px solid #ccc;
@@ -35,12 +54,10 @@ input {
     font-size: 14px;
     width: 100%;
 }
-
 input[readonly] {
     background-color: #e0e0e0;
     cursor: not-allowed;
 }
-
 button {
     padding: 10px;
     border: none;
@@ -51,21 +68,85 @@ button {
     color: white;
     font-size: 16px;
 }
-
 button:hover {
     background: #43a047;
 }
-
 #successMsg {
     margin-top: 15px;
     color: #2e7d32;
     font-weight: bold;
     text-align: center;
 }
+/* Side menu */
+.side-menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    background-color: #4CAF50;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+}
+.side-menu a {
+    padding: 15px 30px;
+    text-decoration: none;
+    font-size: 18px;
+    color: white;
+    display: block;
+    cursor: pointer;
+}
+.side-menu a:hover {
+    background-color: #45a049;
+}
+.side-menu .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+}
+/* Nested patient submenu */
+.patient-submenu {
+    display: none;
+    background-color: #388E3C;
+}
+.patient-submenu a {
+    padding-left: 50px;
+    font-size: 16px;
+}
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+}
 </style>
 </head>
 <body>
 
+<header>
+    <span class="menu-icon" id="menuBtn">&#9776;</span>
+    <h1>Settings</h1>
+</header>
+
+<!-- Side menu -->
+<div id="myMenu" class="side-menu">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <a href="home.html">Dashboard</a>
+    <a href="#" id="patientsBtn">Patients &#9662;</a>
+    <div class="patient-submenu" id="patientSubmenu">
+        <a href="register.html">Patient List</a>
+        <a href="medschedule.html">Medicine Schedule</a>
+        <a href="log.html">Medicine Log</a>
+    </div>
+    <a href="userset.html">Settings</a>
+    <a href="#" id="logoutBtn">Logout</a>
+</div>
+
+<div class="container">
 <h2>User Settings</h2>
 
 <form id="userSettingsForm">
@@ -89,7 +170,6 @@ button:hover {
         <input type="text" id="officeNumber" placeholder="Enter office number">
     </div>
 
-    <!-- Password fields without eye icon -->
     <div class="form-group">
         <label>New Password</label>
         <input type="password" id="newPassword" placeholder="Enter new password">
@@ -104,13 +184,13 @@ button:hover {
 </form>
 
 <div id="successMsg"></div>
+</div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyBWaH3wC79rB2qGtOqYYWogb4nlPbPCoqs",
     authDomain: "patient-system-97412.firebaseapp.com",
@@ -124,7 +204,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth();
 const db = getFirestore();
-
 const successMsg = document.getElementById('successMsg');
 
 // Load user data
@@ -145,7 +224,7 @@ onAuthStateChanged(auth, async (user) => {
     }
 });
 
-// Save settings and update password
+// Save settings
 document.getElementById('userSettingsForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const user = auth.currentUser;
@@ -157,7 +236,6 @@ document.getElementById('userSettingsForm').addEventListener('submit', async (e)
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
 
-    // Update password if provided
     if(newPassword || confirmPassword){
         if(newPassword !== confirmPassword){
             return successMsg.textContent = "Passwords do not match!";
@@ -169,14 +247,38 @@ document.getElementById('userSettingsForm').addEventListener('submit', async (e)
         }
     }
 
-    // Save other settings
     await setDoc(doc(db, "users", user.uid), { name, location, officeNumber }, { merge: true });
-
     successMsg.textContent = "Settings saved successfully!";
-    
-    // Clear password fields
     document.getElementById('newPassword').value = '';
     document.getElementById('confirmPassword').value = '';
+});
+
+// Hamburger menu open/close
+const menuBtn = document.getElementById("menuBtn");
+const closeBtn = document.getElementById("closeBtn");
+const sideMenu = document.getElementById("myMenu");
+
+menuBtn.addEventListener("click", () => { sideMenu.style.width = "250px"; });
+closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
+
+// Toggle patient submenu
+const patientsBtn = document.getElementById("patientsBtn");
+const patientSubmenu = document.getElementById("patientSubmenu");
+patientsBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    patientSubmenu.style.display = patientSubmenu.style.display === "block" ? "none" : "block";
+});
+
+// Logout
+const logoutBtn = document.getElementById("logoutBtn");
+logoutBtn.addEventListener("click", () => {
+    if (typeof auth !== "undefined") {
+        signOut(auth).then(() => { window.location.href = "index.html"; })
+        .catch((error) => { alert("Logout failed: " + error.message); });
+    } else {
+        window.location.href = "index.html";
+    }
 });
 </script>
 
