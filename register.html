@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register Patient</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    padding: 20px;
+}
+
+h2, h3 {
+    text-align: center;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-btn {
+    width: 100%;
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.add-btn:hover {
+    background: #43a047;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+th {
+    background-color: #f0f0f0;
+}
+
+/* Smaller action column */
+th:last-child, td:last-child {
+    width: 80px; /* just enough for delete button */
+    text-align: center;
+}
+
+.delete-btn {
+    background-color: #e53935;
+    color: white;
+    border: none;
+    padding: 6px 10px; /* smaller padding */
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px; /* slightly smaller */
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+<body>
+
+<h2>Register New Patient</h2>
+
+<div class="form-row">
+    <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regPatientName" placeholder="Enter full name" required>
+    </div>
+    <div class="form-group">
+        <label>Age</label>
+        <input type="number" id="regPatientAge" placeholder="Enter age" required>
+    </div>
+</div>
+
+<button class="add-btn" onclick="registerPatient()">Register Patient</button>
+
+<!-- Registered Patients Table -->
+<h3>Registered Patients</h3>
+<table id="registeredTable">
+    <thead>
+        <tr>
+            <th>Full Name</th>
+            <th>Age</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<script>
+function loadRegisteredPatients() {
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    const tableBody = document.getElementById('registeredTable').querySelector('tbody');
+    tableBody.innerHTML = ''; // clear table
+
+    patients.forEach((p, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${p.name}</td>
+            <td>${p.age}</td>
+            <td><button class="delete-btn" onclick="deletePatient(${index})">Delete</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+function registerPatient() {
+    const name = document.getElementById('regPatientName').value.trim();
+    const age = document.getElementById('regPatientAge').value.trim();
+
+    if(!name || !age) {
+        alert("Please fill in all fields!");
+        return;
+    }
+
+    // Load existing patients
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+
+    // Prevent duplicate names
+    if(patients.some(p => p.name === name)){
+        alert("Patient already registered!");
+        return;
+    }
+
+    // Add new patient
+    patients.push({ name, age });
+    localStorage.setItem('patients', JSON.stringify(patients));
+
+    // Clear form
+    document.getElementById('regPatientName').value = '';
+    document.getElementById('regPatientAge').value = '';
+
+    // Reload table
+    loadRegisteredPatients();
+}
+
+// Delete patient
+function deletePatient(index) {
+    let patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    patients.splice(index, 1);
+    localStorage.setItem('patients', JSON.stringify(patients));
+    loadRegisteredPatients();
+}
+
+// Load table on page load
+window.onload = loadRegisteredPatients;
+</script>
+
+</body>
+</html>
