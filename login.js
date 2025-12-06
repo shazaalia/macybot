@@ -12,7 +12,7 @@ loginForm.addEventListener('submit', async (e) => {
     // login success
     alert('Login successful!');
     // redirect to dashboard page (create this later)
-    window.location.href = 'dashboard.html';
+    window.location.href = 'home.html';
   } catch (err) {
     console.error(err);
     alert('Login error: ' + err.message);
