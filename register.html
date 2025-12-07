@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patient List</title>
+<title>Register Patient</title>
 
 <style>
 body {
@@ -133,10 +133,10 @@ th, td {
     text-align: left;
 }
 
-/* Column width adjustments */
+/* Column width adjustments for 15-digit contact */
 #registeredTable th:nth-child(1),
 #registeredTable td:nth-child(1) {
-    width: 60%; /* Full Name */
+    width: 35%; /* Full Name */
 }
 
 #registeredTable th:nth-child(2),
@@ -146,16 +146,15 @@ th, td {
 
 #registeredTable th:nth-child(3),
 #registeredTable td:nth-child(3) {
-    width: 20%; /* Contact Number - wide enough for 15 digits */
+    width: 40%; /* Contact Number */
     white-space: nowrap; /* keep all digits in one line */
 }
 
 #registeredTable th:last-child,
 #registeredTable td:last-child {
-    width: 10%; /* Action column */
+    width: 15%; /* Action column */
     text-align: center;
 }
-
 
 th {
     background-color: #f0f0f0;
@@ -190,7 +189,7 @@ th {
 
 <header>
     <span class="menu-icon" id="menuBtn">&#9776;</span>
-    <h1>Patient List</h1>
+    <h1>Register Patient</h1>
 </header>
 
 <!-- Side menu -->
