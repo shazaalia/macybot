@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Medicine Log</title>
+<style>
+body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; position: relative; }
+.menu-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 28px; cursor: pointer; }
+.side-menu { height: 100%; width: 0; position: fixed; top: 0; left: 0; background-color: #4CAF50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; z-index: 1000; }
+.side-menu a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: white; display: block; }
+.side-menu a:hover { background-color: #45a049; }
+.side-menu .close-btn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; }
+.patient-submenu { display: none; background-color: #388E3C; }
+.patient-submenu a { padding-left: 50px; }
+.container { padding: 20px; max-width: 1200px; margin: auto; }
+h2 { text-align: center; margin-bottom: 20px; }
+
+/* Centered date filter */
+#filterRow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+#filterRow label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+#filterRow input[type="date"] {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+#logTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+#logTable th, #logTable td { border: 1px solid #ccc; padding: 10px; text-align: left; word-wrap: break-word; }
+#logTable th { background: #f0f0f0; }
+.status-delivered { background: #4CAF50; color: white; padding: 6px 10px; border-radius: 6px; }
+.status-pending { background: #ff9800; color: white; padding: 6px 10px; border-radius: 6px; }
+.update-btn { padding: 6px 12px; background: #1976d2; color: white; border: none; border-radius: 6px; cursor: pointer; }
+.update-btn:hover { background: #0d47a1; }
+</style>
+</head>
+<body>
+
+<header>
+    <span class="menu-icon" id="menuBtn">&#9776;</span>
+    <h1>Medicine Log</h1>
+</header>
+
+<!-- Side Menu -->
+<div id="myMenu" class="side-menu">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <a href="home.html">Dashboard</a>
+    <a href="#" id="patientsBtn">Patients &#9662;</a>
+    <div class="patient-submenu" id="patientSubmenu">
+        <a href="register.html">Patient List</a>
+        <a href="medschedule.html">Medicine Schedule</a>
+        <a href="log.html">Medicine Log</a>
+    </div>
+    <a href="userset.html">Settings</a>
+    <a href="#" id="logoutBtn">Logout</a>
+</div>
+
+<div class="container">
+    <h2>Medicine Delivery Log</h2>
+
+    <!-- Centered Date filter -->
+    <div id="filterRow">
+        <label for="filterDate">Select Date:</label>
+        <input type="date" id="filterDate">
+    </div>
+
+    <table id="logTable">
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Age</th>
+                <th>Medicine</th>
+                <th>Time</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+// Side menu
+document.getElementById("menuBtn").onclick = () => { document.getElementById("myMenu").style.width = "250px"; };
+document.getElementById("closeBtn").onclick = () => { document.getElementById("myMenu").style.width = "0"; };
+document.getElementById("patientsBtn").onclick = function(e){
+    e.preventDefault();
+    let submenu = document.getElementById("patientSubmenu");
+    submenu.style.display = submenu.style.display === "block" ? "none" : "block";
+};
+document.getElementById("logoutBtn").onclick = () => { alert("Logged out"); window.location.href = "index.html"; };
+
+// Load log table
+function loadLogs() {
+    const dashboardPatients = JSON.parse(localStorage.getItem("dashboardPatients") || "[]");
+    let logs = JSON.parse(localStorage.getItem("medicineLogs") || "[]");
+    const tbody = document.querySelector("#logTable tbody");
+    tbody.innerHTML = "";
+
+    const filterDateInput = document.getElementById("filterDate");
+    const selectedDate = filterDateInput.value || new Date().toISOString().split('T')[0];
+
+    dashboardPatients.forEach((p) => {
+        let logEntry = logs.find(l => l.name===p.name && l.medicine===p.medicine && l.time===p.medTime && l.date===selectedDate);
+        if(!logEntry){
+            logEntry = { name: p.name, age: p.age, medicine: p.medicine, time: p.medTime, date: selectedDate, status: "Pending" };
+            logs.push(logEntry);
+        }
+
+        if(logEntry.date === selectedDate){
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${logEntry.name}</td>
+                <td>${logEntry.age}</td>
+                <td>${logEntry.medicine}</td>
+                <td>${logEntry.time}</td>
+                <td>${logEntry.date}</td>
+                <td><span class="${logEntry.status === "Delivered" ? "status-delivered" : "status-pending"}">${logEntry.status}</span></td>
+                <td><button class="update-btn" onclick="toggleStatus(${logs.indexOf(logEntry)})">Toggle</button></td>
+            `;
+            tbody.appendChild(row);
+        }
+    });
+
+    localStorage.setItem("medicineLogs", JSON.stringify(logs));
+}
+
+// Toggle status
+function toggleStatus(index){
+    let logs = JSON.parse(localStorage.getItem("medicineLogs") || "[]");
+    logs[index].status = logs[index].status==="Delivered" ? "Pending" : "Delivered";
+    localStorage.setItem("medicineLogs", JSON.stringify(logs));
+    loadLogs();
+}
+
+// Live update in same tab using BroadcastChannel
+const bc = new BroadcastChannel('medicine_channel');
+bc.onmessage = (event) => {
+    if(event.data === 'update'){
+        loadLogs();
+    }
+};
+
+// Filter date change
+document.getElementById("filterDate").addEventListener("change", loadLogs);
+
+// Initialize
+window.onload = () => {
+    document.getElementById("filterDate").value = new Date().toISOString().split('T')[0];
+    loadLogs();
+};
+</script>
+
+</body>
+</html>

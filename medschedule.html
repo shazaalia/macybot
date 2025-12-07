@@ -92,7 +92,7 @@ button:hover { background: #43a047; }
 #patientTable th { background-color: #f0f0f0; }
 /* Column widths */
 #patientTable th:nth-child(2), #patientTable td:nth-child(2) { width: 60px; text-align: center; }
-#patientTable th:nth-child(4), #patientTable td:nth-child(4) { width: 100px; text-align: center; }
+#patientTable th:nth-child(4), #patientTable td:nth-child(4) { width: 150px; text-align: center; }
 #patientTable th:last-child, #patientTable td:last-child { width: 100px; text-align: center; white-space: nowrap; }
 
 /* Action buttons */
@@ -145,6 +145,15 @@ button:hover { background: #43a047; }
     cursor:pointer;
 }
 
+/* Medicine time container */
+#timeContainer {
+    display:flex;
+    gap:5px;
+    align-items:center;
+}
+
+.time-wrapper input { margin-right:5px; }
+
 @media (max-width: 600px) { 
     .form-row { grid-template-columns: 1fr; } 
     .small-input { width: 100%; } 
@@ -196,7 +205,12 @@ button:hover { background: #43a047; }
         </div>
         <div class="form-group">
             <label>Medicine Time</label>
-            <input type="time" id="patientMedTime" class="small-input">
+            <div id="timeContainer">
+                <div class="time-wrapper">
+                    <input type="time" class="medTimeInput small-input">
+                </div>
+            </div>
+            <button type="button" onclick="addMedTime()" style="margin-top:5px;">+ Add Time</button>
         </div>
     </div>
 
@@ -225,32 +239,28 @@ button:hover { background: #43a047; }
     </div>
 </div>
 
-<!-- QR code library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <script>
-// Side menu open/close
+// Side menu
 const menuBtn = document.getElementById("menuBtn");
 const closeBtn = document.getElementById("closeBtn");
 const sideMenu = document.getElementById("myMenu");
-
 menuBtn.addEventListener("click", () => { sideMenu.style.width = "250px"; });
 closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
 
-// Toggle patient submenu
+// Patient submenu
 const patientsBtn = document.getElementById("patientsBtn");
 const patientSubmenu = document.getElementById("patientSubmenu");
 patientsBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); e.stopPropagation();
     patientSubmenu.style.display = patientSubmenu.style.display === "block" ? "none" : "block";
 });
 
-// Logout placeholder
+// Logout
 const logoutBtn = document.getElementById("logoutBtn");
 logoutBtn.addEventListener("click", () => { alert("Logged out"); window.location.href = "index.html"; });
 
-// Load registered patients into dropdown
+// Load registered patients
 function loadRegisteredPatients() {
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
     const select = document.getElementById('patientSelect');
@@ -271,23 +281,62 @@ function fillAge() {
     document.getElementById('patientAge').value = patient ? patient.age : '';
 }
 
-let patientQRs = {}; // store QR codes
+let patientQRs = {}; // QR storage
+
+// Add horizontal medicine time input
+function addMedTime() {
+    const container = document.getElementById('timeContainer');
+    const wrapper = document.createElement('div');
+    wrapper.className = 'time-wrapper';
+    wrapper.style.display = 'flex';
+    wrapper.style.alignItems = 'center';
+
+    const input = document.createElement('input');
+    input.type = 'time';
+    input.className = 'medTimeInput small-input';
+    input.style.marginRight = '5px';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.textContent = '✖';
+    removeBtn.style.background = '#e53935';
+    removeBtn.style.color = 'white';
+    removeBtn.style.border = 'none';
+    removeBtn.style.borderRadius = '4px';
+    removeBtn.style.padding = '2px 6px';
+    removeBtn.style.cursor = 'pointer';
+    removeBtn.onclick = () => wrapper.remove();
+
+    wrapper.appendChild(input);
+    wrapper.appendChild(removeBtn);
+    container.appendChild(wrapper);
+}
+
+// Get all times
+function getMedTimes() {
+    const inputs = document.querySelectorAll('.medTimeInput');
+    const times = [];
+    inputs.forEach(input => { if(input.value) times.push(input.value); });
+    return times;
+}
 
 // Add patient
 function addPatient() {
     const name = document.getElementById('patientSelect').value;
     const age = document.getElementById('patientAge').value;
     const medicine = document.getElementById('patientMedicine').value.trim();
-    const medTime = document.getElementById('patientMedTime').value;
-    if(!name || !age || !medicine || !medTime){ alert("Please fill in all fields!"); return; }
+    const medTimes = getMedTimes();
+    if(!name || !age || !medicine || medTimes.length === 0){ 
+        alert("Please fill in all fields!"); return; 
+    }
 
-    const newPatient = { name, age, medicine, medTime };
+    const newPatient = { name, age, medicine, medTimes }; 
     let patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
     patientList.push(newPatient);
     localStorage.setItem('dashboardPatients', JSON.stringify(patientList));
-
     appendRow(newPatient);
 
+    // Add medicine to datalist if new
     const datalist = document.getElementById('medicineList');
     if(!Array.from(datalist.options).some(opt => opt.value === medicine)){
         const option = document.createElement('option');
@@ -295,25 +344,28 @@ function addPatient() {
         datalist.appendChild(option);
     }
 
+    // Reset form
     document.getElementById('patientMedicine').value = '';
-    document.getElementById('patientMedTime').value = '';
+    document.getElementById('timeContainer').innerHTML = `
+        <div class="time-wrapper">
+            <input type="time" class="medTimeInput small-input">
+        </div>
+    `;
 }
 
-// Append a row
+// Append row
 function appendRow(patient) {
     const tableBody = document.getElementById('patientTable').querySelector('tbody');
     const row = document.createElement('tr');
-
-    let qrData = patientQRs[patient.name];
-    if(!qrData){ qrData = patient.name; patientQRs[patient.name] = qrData; }
+    let qrData = patientQRs[patient.name] || (patientQRs[patient.name] = patient.name);
 
     row.innerHTML = `
         <td>${patient.name}</td>
         <td>${patient.age}</td>
         <td>${patient.medicine}</td>
-        <td>${patient.medTime}</td>
+        <td>${patient.medTimes.join(', ')}</td>
         <td>
-            <button class="action-btn delete-btn" onclick="deleteRow(this, '${patient.name}', '${patient.medicine}', '${patient.medTime}')">✖</button>
+            <button class="action-btn delete-btn" onclick="deleteRow(this, '${patient.name}', '${patient.medicine}', '${patient.medTimes.join('|')}')">✖</button>
             <button class="action-btn qr-btn" onclick="showQR('${qrData}')">👁</button>
         </td>
     `;
@@ -321,10 +373,11 @@ function appendRow(patient) {
 }
 
 // Delete row
-function deleteRow(btn, name, medicine, medTime) {
+function deleteRow(btn, name, medicine, medTimesStr) {
     btn.parentElement.parentElement.remove();
     let patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
-    patientList = patientList.filter(p => !(p.name === name && p.medicine === medicine && p.medTime === medTime));
+    const medTimes = medTimesStr.split('|');
+    patientList = patientList.filter(p => !(p.name === name && p.medicine === medicine && p.medTimes.join('|') === medTimes.join('|')));
     localStorage.setItem('dashboardPatients', JSON.stringify(patientList));
 }
 
@@ -349,6 +402,5 @@ function loadDashboard() {
 // Initialize
 window.onload = () => { loadRegisteredPatients(); loadDashboard(); };
 </script>
-
 </body>
 </html>
