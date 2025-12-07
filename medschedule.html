@@ -5,68 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Medicine Schedule</title>
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
-    margin: 0;
-    padding: 0;
-}
-header {
-    background-color: #4CAF50;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    position: relative;
-    z-index: 1;
-}
-/* Hamburger menu icon */
-.menu-icon {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 28px;
-    cursor: pointer;
-    z-index: 2;
-}
+body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
+header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; position: relative; z-index: 1; }
+.menu-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 28px; cursor: pointer; z-index: 2; }
 .container { padding: 20px; max-width: 1200px; margin: auto; }
-
-/* Side menu */
-.side-menu {
-    height: 100%;
-    width: 0;
-    position: fixed;
-    z-index: 1000;
-    top: 0;
-    left: 0;
-    background-color: #4CAF50;
-    overflow-x: hidden;
-    transition: 0.3s;
-    padding-top: 60px;
-}
-.side-menu a {
-    padding: 15px 30px;
-    text-decoration: none;
-    font-size: 18px;
-    color: white;
-    display: block;
-    cursor: pointer;
-}
+.side-menu { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #4CAF50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; }
+.side-menu a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: white; display: block; cursor: pointer; }
 .side-menu a:hover { background-color: #45a049; }
-.side-menu .close-btn {
-    position: absolute;
-    top: 10px;
-    right: 20px;
-    font-size: 30px;
-    cursor: pointer;
-}
-/* Nested patient submenu */
+.side-menu .close-btn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; }
 .patient-submenu { display: none; background-color: #388E3C; }
 .patient-submenu a { padding-left: 50px; font-size: 16px; }
-
-/* Medicine Schedule specific styles */
 h2 { text-align: center; margin-bottom: 20px; }
-/* Dashboard input rows */
 .form-row { display: grid; grid-template-columns: 1fr auto; gap: 20px; margin-bottom: 20px; }
 .form-group { display: flex; flex-direction: column; }
 label { font-weight: bold; margin-bottom: 5px; }
@@ -74,90 +23,23 @@ input, select { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-
 .small-input { width: 140px; }
 button { width: 100%; padding: 12px; background: #4CAF50; border: none; color: white; font-size: 16px; border-radius: 8px; cursor: pointer; }
 button:hover { background: #43a047; }
-
-/* Patient Table */
-#patientTable {
-    width: 100%;
-    margin-top: 30px;
-    border-collapse: collapse;
-    table-layout: fixed;
-}
-#patientTable th, #patientTable td {
-    padding: 10px;
-    border: 1px solid #ccc;
-    text-align: left;
-    vertical-align: middle;
-    word-wrap: break-word;
-}
+#patientTable { width: 100%; margin-top: 30px; border-collapse: collapse; table-layout: fixed; }
+#patientTable th, #patientTable td { padding: 10px; border: 1px solid #ccc; text-align: left; vertical-align: middle; word-wrap: break-word; }
 #patientTable th { background-color: #f0f0f0; }
-/* Column widths */
 #patientTable th:nth-child(2), #patientTable td:nth-child(2) { width: 60px; text-align: center; }
 #patientTable th:nth-child(4), #patientTable td:nth-child(4) { width: 150px; text-align: center; }
 #patientTable th:last-child, #patientTable td:last-child { width: 100px; text-align: center; white-space: nowrap; }
-
-/* Action buttons */
-.action-btn {
-    display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    width: 30px;
-    height: 30px;
-    font-size: 16px;
-    border-radius: 4px;
-    cursor: pointer;
-    margin: 0 2px;
-    padding: 0;
-}
+.action-btn { display: inline-flex; justify-content: center; align-items: center; width: 30px; height: 30px; font-size: 16px; border-radius: 4px; cursor: pointer; margin: 0 2px; padding: 0; }
 .delete-btn { background-color: #e53935; color: white; border: none; }
 .delete-btn:hover { background-color: #d32f2f; }
 .qr-btn { background-color: #1976d2; color: white; border: none; }
 .qr-btn:hover { background-color: #1565c0; }
-
-/* QR Modal */
-#qrModal {
-    display:none;
-    position:fixed;
-    top:0; left:0;
-    width:100%; height:100%;
-    background: rgba(0,0,0,0.7);
-    justify-content:center;
-    align-items:center;
-    z-index:1000;
-}
-#qrContainer {
-    background:white;
-    padding:20px;
-    border-radius:12px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    max-width:90%;
-    max-height:90%;
-}
-#qrContainer button {
-    margin-top:15px;
-    padding:8px 16px;
-    border:none;
-    background:#e53935;
-    color:white;
-    border-radius:6px;
-    cursor:pointer;
-}
-
-/* Medicine time container */
-#timeContainer {
-    display:flex;
-    gap:5px;
-    align-items:center;
-}
-
+#qrModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); justify-content:center; align-items:center; z-index:1000; }
+#qrContainer { background:white; padding:20px; border-radius:12px; display:flex; justify-content:center; align-items:center; flex-direction:column; max-width:90%; max-height:90%; }
+#qrContainer button { margin-top:15px; padding:8px 16px; border:none; background:#e53935; color:white; border-radius:6px; cursor:pointer; }
+#timeContainer { display:flex; gap:5px; align-items:center; }
 .time-wrapper input { margin-right:5px; }
-
-@media (max-width: 600px) { 
-    .form-row { grid-template-columns: 1fr; } 
-    .small-input { width: 100%; } 
-}
+@media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .small-input { width: 100%; } }
 </style>
 </head>
 <body>
@@ -167,7 +49,6 @@ button:hover { background: #43a047; }
     <h1>Medicine Schedule</h1>
 </header>
 
-<!-- Side menu -->
 <div id="myMenu" class="side-menu">
     <span class="close-btn" id="closeBtn">&times;</span>
     <a href="home.html">Dashboard</a>
@@ -182,7 +63,6 @@ button:hover { background: #43a047; }
 </div>
 
 <div class="container">
-    <!-- Patient selection -->
     <div class="form-row">
         <div class="form-group">
             <label>Full Name</label>
@@ -196,7 +76,6 @@ button:hover { background: #43a047; }
         </div>
     </div>
 
-    <!-- Medicine name + time -->
     <div class="form-row">
         <div class="form-group">
             <label>Medicine Name</label>
@@ -216,7 +95,6 @@ button:hover { background: #43a047; }
 
     <button onclick="addPatient()">Add Patient</button>
 
-    <!-- Patient Table -->
     <table id="patientTable">
         <thead>
             <tr>
@@ -231,7 +109,6 @@ button:hover { background: #43a047; }
     </table>
 </div>
 
-<!-- QR Modal -->
 <div id="qrModal">
     <div id="qrContainer">
         <div id="qrCode"></div>
@@ -241,6 +118,9 @@ button:hover { background: #43a047; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
+// BroadcastChannel for live updates
+const bc = new BroadcastChannel('medicine_channel');
+
 // Side menu
 const menuBtn = document.getElementById("menuBtn");
 const closeBtn = document.getElementById("closeBtn");
@@ -251,10 +131,7 @@ closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
 // Patient submenu
 const patientsBtn = document.getElementById("patientsBtn");
 const patientSubmenu = document.getElementById("patientSubmenu");
-patientsBtn.addEventListener("click", (e) => {
-    e.preventDefault(); e.stopPropagation();
-    patientSubmenu.style.display = patientSubmenu.style.display === "block" ? "none" : "block";
-});
+patientsBtn.addEventListener("click", (e) => { e.preventDefault(); patientSubmenu.style.display = patientSubmenu.style.display === "block" ? "none" : "block"; });
 
 // Logout
 const logoutBtn = document.getElementById("logoutBtn");
@@ -265,12 +142,7 @@ function loadRegisteredPatients() {
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
     const select = document.getElementById('patientSelect');
     select.innerHTML = '<option value="">-- Select Patient --</option>';
-    patients.forEach(p => {
-        const option = document.createElement('option');
-        option.value = p.name;
-        option.text = p.name;
-        select.appendChild(option);
-    });
+    patients.forEach(p => { const option = document.createElement('option'); option.value = p.name; option.text = p.name; select.appendChild(option); });
 }
 
 // Auto-fill age
@@ -281,7 +153,7 @@ function fillAge() {
     document.getElementById('patientAge').value = patient ? patient.age : '';
 }
 
-let patientQRs = {}; // QR storage
+let patientQRs = {}; 
 
 // Add horizontal medicine time input
 function addMedTime() {
@@ -314,10 +186,9 @@ function addMedTime() {
 
 // Get all times
 function getMedTimes() {
-    const inputs = document.querySelectorAll('.medTimeInput');
-    const times = [];
-    inputs.forEach(input => { if(input.value) times.push(input.value); });
-    return times;
+    return Array.from(document.querySelectorAll('.medTimeInput'))
+        .map(input => input.value)
+        .filter(val => val);
 }
 
 // Add patient
@@ -326,17 +197,17 @@ function addPatient() {
     const age = document.getElementById('patientAge').value;
     const medicine = document.getElementById('patientMedicine').value.trim();
     const medTimes = getMedTimes();
-    if(!name || !age || !medicine || medTimes.length === 0){ 
-        alert("Please fill in all fields!"); return; 
-    }
+    if(!name || !age || !medicine || medTimes.length === 0){ alert("Please fill in all fields!"); return; }
 
     const newPatient = { name, age, medicine, medTimes }; 
     let patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
     patientList.push(newPatient);
     localStorage.setItem('dashboardPatients', JSON.stringify(patientList));
+
+    bc.postMessage('update'); // Live update
+
     appendRow(newPatient);
 
-    // Add medicine to datalist if new
     const datalist = document.getElementById('medicineList');
     if(!Array.from(datalist.options).some(opt => opt.value === medicine)){
         const option = document.createElement('option');
@@ -344,13 +215,8 @@ function addPatient() {
         datalist.appendChild(option);
     }
 
-    // Reset form
     document.getElementById('patientMedicine').value = '';
-    document.getElementById('timeContainer').innerHTML = `
-        <div class="time-wrapper">
-            <input type="time" class="medTimeInput small-input">
-        </div>
-    `;
+    document.getElementById('timeContainer').innerHTML = `<div class="time-wrapper"><input type="time" class="medTimeInput small-input"></div>`;
 }
 
 // Append row
@@ -379,6 +245,8 @@ function deleteRow(btn, name, medicine, medTimesStr) {
     const medTimes = medTimesStr.split('|');
     patientList = patientList.filter(p => !(p.name === name && p.medicine === medicine && p.medTimes.join('|') === medTimes.join('|')));
     localStorage.setItem('dashboardPatients', JSON.stringify(patientList));
+
+    bc.postMessage('update'); // Live update
 }
 
 // QR modal
@@ -389,9 +257,7 @@ function showQR(data) {
     document.getElementById('qrModal').style.display = 'flex';
 }
 function closeQR(){ document.getElementById('qrModal').style.display = 'none'; }
-document.getElementById('qrModal').addEventListener('click', function(e){
-    if(e.target.id === 'qrModal'){ closeQR(); }
-});
+document.getElementById('qrModal').addEventListener('click', e => { if(e.target.id === 'qrModal'){ closeQR(); } });
 
 // Load dashboard
 function loadDashboard() {
