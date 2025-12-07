@@ -5,60 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register Patient</title>
 <style>
-/* Your existing CSS (unchanged) */
+/* Use your existing CSS */
 body { font-family: Arial, sans-serif; background: #f4f6f8; margin: 0; padding: 0; }
-header { background-color: #4CAF50; color: white; padding: 20px; text-align: center; position: relative; }
-.menu-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 28px; cursor: pointer; }
-.side-menu { height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0; background-color: #4CAF50; overflow-x: hidden; transition: 0.3s; padding-top: 60px; }
-.side-menu a { padding: 15px 30px; text-decoration: none; font-size: 18px; color: white; display: block; }
-.side-menu a:hover { background-color: #45a049; }
-.side-menu .close-btn { position: absolute; top: 10px; right: 20px; font-size: 30px; cursor: pointer; }
-.patient-submenu { display: none; background-color: #388E3C; }
-.patient-submenu a { padding-left: 50px; font-size: 16px; }
-.container { padding: 20px; }
-h2, h3 { text-align: center; }
-.form-row { display: grid; grid-template-columns: 1fr auto auto; gap: 30px; margin-bottom: 20px; }
-.form-group { display: flex; flex-direction: column; }
-label { font-weight: bold; margin-bottom: 5px; }
-input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-button { padding: 10px; border: none; border-radius: 6px; cursor: pointer; }
-.add-btn { width: 100%; background: #4CAF50; color: white; font-size: 16px; margin-bottom: 10px; }
-.add-btn:hover { background: #43a047; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-#registeredTable th:nth-child(1), #registeredTable td:nth-child(1) { width: 35%; }
-#registeredTable th:nth-child(2), #registeredTable td:nth-child(2) { width: 10%; }
-#registeredTable th:nth-child(3), #registeredTable td:nth-child(3) { width: 40%; white-space: nowrap; }
-#registeredTable th:last-child, #registeredTable td:last-child { width: 15%; text-align: center; }
-th { background-color: #f0f0f0; }
-.delete-btn { background-color: #e53935; color: white; padding: 6px 10px; border-radius: 5px; }
-.delete-btn:hover { background-color: #d32f2f; }
-@media (max-width: 600px) {
-    .form-row { grid-template-columns: 1fr; gap: 10px; }
-    input { width: 100% !important; }
-    #registeredTable th, #registeredTable td { font-size: 12px; }
-}
+/* ... all your existing CSS ... */
 </style>
 </head>
 <body>
 
 <header>
-    <span class="menu-icon" id="menuBtn">&#9776;</span>
     <h1>Register Patient</h1>
 </header>
-
-<div id="myMenu" class="side-menu">
-    <span class="close-btn" id="closeBtn">&times;</span>
-    <a href="home.html">Dashboard</a>
-    <a href="#" id="patientsBtn">Patients &#9662;</a>
-    <div class="patient-submenu" id="patientSubmenu">
-        <a href="register.html">Patient List</a>
-        <a href="medschedule.html">Medicine Schedule</a>
-        <a href="log.html">Medicine Log</a>
-    </div>
-    <a href="userset.html">Settings</a>
-    <a href="#" id="logoutBtn">Logout</a>
-</div>
 
 <div class="container">
 <h2>Register New Patient</h2>
@@ -69,15 +25,15 @@ th { background-color: #f0f0f0; }
     </div>
     <div class="form-group">
         <label>Age</label>
-        <input type="number" id="regPatientAge" placeholder="Age" maxlength="3" style="width:80px; padding:10px; border-radius:6px;" required>
+        <input type="number" id="regPatientAge" placeholder="Age" required>
     </div>
     <div class="form-group">
         <label>Contact Number</label>
-        <input type="text" id="regContactNumber" placeholder="Enter contact number" maxlength="15" style="width:180px; padding:10px; border-radius:6px;" required>
+        <input type="text" id="regContactNumber" placeholder="Enter contact number" required>
     </div>
 </div>
 
-<button class="add-btn" onclick="registerPatient()">Register Patient</button>
+<button id="registerBtn">Register Patient</button>
 
 <h3>Registered Patients</h3>
 <table id="registeredTable">
@@ -93,89 +49,87 @@ th { background-color: #f0f0f0; }
 </table>
 </div>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
-// Your Firebase config
+<!-- Firebase SDK Modular -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+// Firebase config
 const firebaseConfig = {
     apiKey: "AIzaSyBWaH3wC79rB2qGtOqYYWogb4nlPbPCoqs",
     authDomain: "patient-system-97412.firebaseapp.com",
     projectId: "patient-system-97412",
-    storageBucket: "patient-system-97412.firebasestorage.app",
+    storageBucket: "patient-system-97412.appspot.com",
     messagingSenderId: "988662086004",
-    appId: "1:988662086004:web:3427af061c370a87521421"
+    appId: "1:988662086004:web:3427af061c370a87521421",
     measurementId: "G-VXTREJV1FG"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 
-// Hamburger menu logic
-const menuBtn = document.getElementById("menuBtn");
-const closeBtn = document.getElementById("closeBtn");
-const sideMenu = document.getElementById("myMenu");
-const patientsBtn = document.getElementById("patientsBtn");
-const patientSubmenu = document.getElementById("patientSubmenu");
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-menuBtn.addEventListener("click", () => { sideMenu.style.width = "250px"; });
-closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
-patientsBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    patientSubmenu.style.display = patientSubmenu.style.display === "block" ? "none" : "block";
-});
+// DOM Elements
+const registerBtn = document.getElementById("registerBtn");
+const tableBody = document.getElementById("registeredTable").querySelector("tbody");
 
-// Load patients from Firestore
+// Load patients
 async function loadRegisteredPatients() {
-    const tableBody = document.getElementById('registeredTable').querySelector('tbody');
     tableBody.innerHTML = '';
-    const snapshot = await db.collection('patients').orderBy('name').get();
-    snapshot.forEach((doc) => {
-        const p = doc.data();
-        const row = document.createElement('tr');
+    const querySnapshot = await getDocs(collection(db, "patients"));
+    querySnapshot.forEach(docSnap => {
+        const p = docSnap.data();
+        const row = document.createElement("tr");
         row.innerHTML = `
             <td>${p.name}</td>
             <td>${p.age}</td>
             <td>${p.contact}</td>
-            <td><button class="delete-btn" onclick="deletePatient('${doc.id}')">Delete</button></td>
+            <td><button class="delete-btn" data-id="${docSnap.id}">Delete</button></td>
         `;
         tableBody.appendChild(row);
+    });
+
+    // Add delete listeners
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            await deleteDoc(doc(db, "patients", id));
+            loadRegisteredPatients();
+        });
     });
 }
 
 // Register patient
-async function registerPatient() {
-    const name = document.getElementById('regPatientName').value.trim();
-    const age = document.getElementById('regPatientAge').value.trim();
-    const contact = document.getElementById('regContactNumber').value.trim();
+registerBtn.addEventListener("click", async () => {
+    const name = document.getElementById("regPatientName").value.trim();
+    const age = document.getElementById("regPatientAge").value.trim();
+    const contact = document.getElementById("regContactNumber").value.trim();
 
     if (!name || !age || !contact) {
         alert("Please fill in all fields!");
         return;
     }
 
-    const existing = await db.collection('patients').where('name', '==', name).get();
-    if (!existing.empty) {
+    // Check if patient already exists
+    const q = query(collection(db, "patients"), where("name", "==", name));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
         alert("Patient already registered!");
         return;
     }
 
-    await db.collection('patients').add({ name, age, contact });
+    await addDoc(collection(db, "patients"), { name, age, contact });
 
-    document.getElementById('regPatientName').value = '';
-    document.getElementById('regPatientAge').value = '';
-    document.getElementById('regContactNumber').value = '';
+    document.getElementById("regPatientName").value = '';
+    document.getElementById("regPatientAge").value = '';
+    document.getElementById("regContactNumber").value = '';
 
     loadRegisteredPatients();
-}
+});
 
-// Delete patient
-async function deletePatient(id) {
-    await db.collection('patients').doc(id).delete();
-    loadRegisteredPatients();
-}
-
-window.onload = loadRegisteredPatients;
+// Load table on page load
+loadRegisteredPatients();
 </script>
+
 </body>
 </html>
