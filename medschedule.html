@@ -118,34 +118,33 @@ button:hover { background: #43a047; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-// BroadcastChannel for live updates
-const bc = new BroadcastChannel('medicine_channel');
-
-// Side menu
+// ---------- Side menu ----------
 const menuBtn = document.getElementById("menuBtn");
 const closeBtn = document.getElementById("closeBtn");
 const sideMenu = document.getElementById("myMenu");
 menuBtn.addEventListener("click", () => { sideMenu.style.width = "250px"; });
 closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
 
-// Patient submenu
 const patientsBtn = document.getElementById("patientsBtn");
 const patientSubmenu = document.getElementById("patientSubmenu");
 patientsBtn.addEventListener("click", (e) => { e.preventDefault(); patientSubmenu.style.display = patientSubmenu.style.display === "block" ? "none" : "block"; });
 
-// Logout
-const logoutBtn = document.getElementById("logoutBtn");
-logoutBtn.addEventListener("click", () => { alert("Logged out"); window.location.href = "index.html"; });
+document.getElementById('logoutBtn').addEventListener('click', () => { alert('Logged out'); window.location.href='index.html'; });
 
-// Load registered patients
+// ---------- Load registered patients ----------
 function loadRegisteredPatients() {
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
     const select = document.getElementById('patientSelect');
     select.innerHTML = '<option value="">-- Select Patient --</option>';
-    patients.forEach(p => { const option = document.createElement('option'); option.value = p.name; option.text = p.name; select.appendChild(option); });
+    patients.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.name;
+        option.text = p.name;
+        select.appendChild(option);
+    });
 }
 
-// Auto-fill age
+// ---------- Fill age ----------
 function fillAge() {
     const name = document.getElementById('patientSelect').value;
     const patients = JSON.parse(localStorage.getItem('patients') || '[]');
@@ -153,9 +152,7 @@ function fillAge() {
     document.getElementById('patientAge').value = patient ? patient.age : '';
 }
 
-let patientQRs = {}; 
-
-// Add horizontal medicine time input
+// ---------- Add medicine time ----------
 function addMedTime() {
     const container = document.getElementById('timeContainer');
     const wrapper = document.createElement('div');
@@ -184,27 +181,23 @@ function addMedTime() {
     container.appendChild(wrapper);
 }
 
-// Get all times
+// ---------- Get medicine times ----------
 function getMedTimes() {
-    return Array.from(document.querySelectorAll('.medTimeInput'))
-        .map(input => input.value)
-        .filter(val => val);
+    return Array.from(document.querySelectorAll('.medTimeInput')).map(i => i.value).filter(v => v);
 }
 
-// Add patient
+// ---------- Add patient medicine ----------
 function addPatient() {
     const name = document.getElementById('patientSelect').value;
     const age = document.getElementById('patientAge').value;
     const medicine = document.getElementById('patientMedicine').value.trim();
     const medTimes = getMedTimes();
-    if(!name || !age || !medicine || medTimes.length === 0){ alert("Please fill in all fields!"); return; }
+    if(!name || !age || !medicine || medTimes.length === 0) { alert('Please fill all fields!'); return; }
 
-    const newPatient = { name, age, medicine, medTimes }; 
-    let patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
+    const patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
+    const newPatient = { name, age, medicine, medTimes };
     patientList.push(newPatient);
     localStorage.setItem('dashboardPatients', JSON.stringify(patientList));
-
-    bc.postMessage('update'); // Live update
 
     appendRow(newPatient);
 
@@ -219,12 +212,10 @@ function addPatient() {
     document.getElementById('timeContainer').innerHTML = `<div class="time-wrapper"><input type="time" class="medTimeInput small-input"></div>`;
 }
 
-// Append row
+// ---------- Append table row ----------
 function appendRow(patient) {
     const tableBody = document.getElementById('patientTable').querySelector('tbody');
     const row = document.createElement('tr');
-    let qrData = patientQRs[patient.name] || (patientQRs[patient.name] = patient.name);
-
     row.innerHTML = `
         <td>${patient.name}</td>
         <td>${patient.age}</td>
@@ -232,41 +223,42 @@ function appendRow(patient) {
         <td>${patient.medTimes.join(', ')}</td>
         <td>
             <button class="action-btn delete-btn" onclick="deleteRow(this, '${patient.name}', '${patient.medicine}', '${patient.medTimes.join('|')}')">✖</button>
-            <button class="action-btn qr-btn" onclick="showQR('${qrData}')">👁</button>
+            <button class="action-btn qr-btn" onclick="showQR('${patient.name}-${patient.medicine}')">👁</button>
         </td>
     `;
     tableBody.appendChild(row);
 }
 
-// Delete row
-function deleteRow(btn, name, medicine, medTimesStr) {
+// ---------- Delete row ----------
+function deleteRow(btn, name, medicine, medTimesStr){
     btn.parentElement.parentElement.remove();
     let patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
     const medTimes = medTimesStr.split('|');
     patientList = patientList.filter(p => !(p.name === name && p.medicine === medicine && p.medTimes.join('|') === medTimes.join('|')));
     localStorage.setItem('dashboardPatients', JSON.stringify(patientList));
-
-    bc.postMessage('update'); // Live update
 }
 
-// QR modal
-function showQR(data) {
+// ---------- QR Code ----------
+function showQR(data){
     const qrDiv = document.getElementById('qrCode');
     qrDiv.innerHTML = '';
     new QRCode(qrDiv, { text: data, width: 300, height: 300 });
     document.getElementById('qrModal').style.display = 'flex';
 }
 function closeQR(){ document.getElementById('qrModal').style.display = 'none'; }
-document.getElementById('qrModal').addEventListener('click', e => { if(e.target.id === 'qrModal'){ closeQR(); } });
+document.getElementById('qrModal').addEventListener('click', e => { if(e.target.id==='qrModal'){ closeQR(); } });
 
-// Load dashboard
+// ---------- Load dashboard table ----------
 function loadDashboard() {
     const patientList = JSON.parse(localStorage.getItem('dashboardPatients') || '[]');
     patientList.forEach(appendRow);
 }
 
-// Initialize
-window.onload = () => { loadRegisteredPatients(); loadDashboard(); };
+// ---------- Initialize ----------
+window.onload = () => {
+    loadRegisteredPatients(); 
+    loadDashboard();
+};
 </script>
 </body>
 </html>
