@@ -3,43 +3,237 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Patient Registration</title>
+<title>Patient List</title>
+
 <style>
-body { font-family: Arial, sans-serif; background: #f4f6f8; padding: 20px; }
-h2 { text-align: center; margin-bottom: 20px; }
-.form-row { display: grid; grid-template-columns: 1fr auto auto; gap: 30px; margin-bottom: 20px; }
-.form-group { display: flex; flex-direction: column; }
-label { font-weight: bold; margin-bottom: 5px; }
-input { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-button { padding: 10px; border: none; border-radius: 6px; cursor: pointer; width: 100%; background: #4CAF50; color: white; font-size: 16px; }
-button:hover { background: #43a047; }
-table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-th, td { padding: 10px; border: 1px solid #ccc; text-align: left; }
-th { background: #f0f0f0; }
-.delete-btn { background: #e53935; color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; }
-.delete-btn:hover { background: #d32f2f; }
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header + Hamburger Menu */
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    position: relative;
+}
+.menu-icon {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 28px;
+    cursor: pointer;
+}
+
+/* Side menu */
+.side-menu {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    background-color: #4CAF50;
+    overflow-x: hidden;
+    transition: 0.3s;
+    padding-top: 60px;
+}
+.side-menu a {
+    padding: 15px 30px;
+    text-decoration: none;
+    font-size: 18px;
+    color: white;
+    display: block;
+}
+.side-menu a:hover {
+    background-color: #45a049;
+}
+.side-menu .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px;
+    cursor: pointer;
+}
+.patient-submenu {
+    display: none;
+    background-color: #388E3C;
+}
+.patient-submenu a {
+    padding-left: 50px;
+    font-size: 16px;
+}
+
+/* Page Content */
+.container {
+    padding: 20px;
+}
+
+h2, h3 {
+    text-align: center;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto; /* Full Name | Age | Contact */
+    gap: 30px;  /* space between Age and Contact Number */
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+button {
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.add-btn {
+    width: 100%;
+    background: #4CAF50;
+    color: white;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.add-btn:hover {
+    background: #43a047;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ccc;
+    text-align: left;
+}
+
+/* Column width adjustments */
+#registeredTable th:nth-child(1),
+#registeredTable td:nth-child(1) {
+    width: 60%; /* Full Name */
+}
+
+#registeredTable th:nth-child(2),
+#registeredTable td:nth-child(2) {
+    width: 10%; /* Age */
+}
+
+#registeredTable th:nth-child(3),
+#registeredTable td:nth-child(3) {
+    width: 20%; /* Contact Number - wide enough for 15 digits */
+    white-space: nowrap; /* keep all digits in one line */
+}
+
+#registeredTable th:last-child,
+#registeredTable td:last-child {
+    width: 10%; /* Action column */
+    text-align: center;
+}
+
+
+th {
+    background-color: #f0f0f0;
+}
+
+.delete-btn {
+    background-color: #e53935;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 5px;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f;
+}
+
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    input {
+        width: 100% !important;
+    }
+    #registeredTable th, #registeredTable td {
+        font-size: 12px;
+    }
+}
 </style>
 </head>
 <body>
 
+<header>
+    <span class="menu-icon" id="menuBtn">&#9776;</span>
+    <h1>Patient List</h1>
+</header>
+
+<!-- Side menu -->
+<div id="myMenu" class="side-menu">
+    <span class="close-btn" id="closeBtn">&times;</span>
+    <a href="home.html">Dashboard</a>
+    <a href="#" id="patientsBtn">Patients &#9662;</a>
+    <div class="patient-submenu" id="patientSubmenu">
+        <a href="register.html">Patient List</a>
+        <a href="medschedule.html">Medicine Schedule</a>
+        <a href="log.html">Medicine Log</a>
+    </div>
+    <a href="userset.html">Settings</a>
+    <a href="#" id="logoutBtn">Logout</a>
+</div>
+
+<div class="container">
+
 <h2>Register New Patient</h2>
 
+<!-- ONE ROW with 3 fields nicely spaced -->
 <div class="form-row">
     <div class="form-group">
         <label>Full Name</label>
-        <input type="text" id="regPatientName" placeholder="Enter full name">
+        <input type="text" id="regPatientName" placeholder="Enter full name" required>
     </div>
+
     <div class="form-group">
         <label>Age</label>
-        <input type="number" id="regPatientAge" placeholder="Age" style="width:80px;">
+        <input type="number" id="regPatientAge" placeholder="Age"
+            maxlength="3"
+            style="width:80px; padding:10px; border-radius:6px;" required>
     </div>
+
     <div class="form-group">
         <label>Contact Number</label>
-        <input type="text" id="regContactNumber" placeholder="Enter contact number" style="width:180px;">
+        <input type="text" id="regContactNumber" placeholder="Enter contact number"
+            maxlength="15"
+            style="width:180px; padding:10px; border-radius:6px;" required>
     </div>
 </div>
 
-<button onclick="registerPatient()">Register Patient</button>
+<button class="add-btn" onclick="registerPatient()">Register Patient</button>
 
 <h3>Registered Patients</h3>
 <table id="registeredTable">
@@ -47,71 +241,87 @@ th { background: #f0f0f0; }
         <tr>
             <th>Full Name</th>
             <th>Age</th>
-            <th>Contact</th>
+            <th>Contact Number</th>
             <th>Action</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+</div>
 
-// 🔑 Your Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyBWaH3wC79rB2qGtOqYYWogb4nlPbPCoqs",
-  authDomain: "patient-system-97412.firebaseapp.com",
-  projectId: "patient-system-97412",
-  storageBucket: "patient-system-97412.firebasestorage.app",
-  messagingSenderId: "988662086004",
-  appId: "1:988662086004:web:3427af061c370a87521421",
-  measurementId: "G-VXTREJV1FG"
-};
+<script>
+// ---------- Hamburger Menu Logic ----------
+const menuBtn = document.getElementById("menuBtn");
+const closeBtn = document.getElementById("closeBtn");
+const sideMenu = document.getElementById("myMenu");
+const patientsBtn = document.getElementById("patientsBtn");
+const patientSubmenu = document.getElementById("patientSubmenu");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+menuBtn.addEventListener("click", () => { sideMenu.style.width = "250px"; });
+closeBtn.addEventListener("click", () => { sideMenu.style.width = "0"; });
 
-// Load patients
-async function loadRegisteredPatients() {
-    const snapshot = await getDocs(collection(db, "patients"));
-    const tableBody = document.querySelector("#registeredTable tbody");
+patientsBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    patientSubmenu.style.display =
+        patientSubmenu.style.display === "block" ? "none" : "block";
+});
+
+// ------------------------------------------
+
+// Load existing patients
+function loadRegisteredPatients() {
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    const tableBody = document.getElementById('registeredTable').querySelector('tbody');
     tableBody.innerHTML = '';
-    snapshot.forEach(docSnap => {
-        const p = docSnap.data();
-        const row = document.createElement("tr");
-        row.dataset.docId = docSnap.id;
+
+    patients.forEach((p, index) => {
+        const row = document.createElement('tr');
         row.innerHTML = `
             <td>${p.name}</td>
             <td>${p.age}</td>
             <td>${p.contact}</td>
-            <td><button class="delete-btn" onclick="deletePatient('${docSnap.id}', this)">Delete</button></td>
+            <td><button class="delete-btn" onclick="deletePatient(${index})">Delete</button></td>
         `;
         tableBody.appendChild(row);
     });
 }
 
-// Register patient
-async function registerPatient() {
-    const name = document.getElementById("regPatientName").value.trim();
-    const age = document.getElementById("regPatientAge").value.trim();
-    const contact = document.getElementById("regContactNumber").value.trim();
-    if(!name || !age || !contact){ alert("Please fill all fields!"); return; }
+function registerPatient() {
+    const name = document.getElementById('regPatientName').value.trim();
+    const age = document.getElementById('regPatientAge').value.trim();
+    const contact = document.getElementById('regContactNumber').value.trim();
 
-    await addDoc(collection(db, "patients"), { name, age, contact });
-    document.getElementById("regPatientName").value = '';
-    document.getElementById("regPatientAge").value = '';
-    document.getElementById("regContactNumber").value = '';
+    if (!name || !age || !contact) {
+        alert("Please fill in all fields!");
+        return;
+    }
+
+    const patients = JSON.parse(localStorage.getItem('patients') || '[]');
+
+    if (patients.some(p => p.name === name)) {
+        alert("Patient already registered!");
+        return;
+    }
+
+    patients.push({ name, age, contact });
+    localStorage.setItem('patients', JSON.stringify(patients));
+
+    document.getElementById('regPatientName').value = '';
+    document.getElementById('regPatientAge').value = '';
+    document.getElementById('regContactNumber').value = '';
+
     loadRegisteredPatients();
 }
 
-// Delete patient
-async function deletePatient(id, btn){
-    await deleteDoc(doc(db, "patients", id));
-    btn.parentElement.parentElement.remove();
+function deletePatient(index) {
+    let patients = JSON.parse(localStorage.getItem('patients') || '[]');
+    patients.splice(index, 1);
+    localStorage.setItem('patients', JSON.stringify(patients));
+    loadRegisteredPatients();
 }
 
-// Initialize
 window.onload = loadRegisteredPatients;
 </script>
 
